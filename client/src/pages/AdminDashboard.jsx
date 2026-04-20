@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { User, CheckCircle, XCircle, LayoutDashboard, FileText, Settings, Search, Filter, AlertCircle, Users, Clock } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const AdminDashboard = () => {
     const [complaints, setComplaints] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('All');
+    const [adminsList, setAdminsList] = useState([]);
+    const { user } = useAuth();
+    
+    const isMainAdmin = user?.username === 'Muralidhar';
 
     // Modal State
     const [selectedComplaint, setSelectedComplaint] = useState(null);
@@ -19,6 +24,21 @@ const AdminDashboard = () => {
     useEffect(() => {
         fetchComplaints();
     }, []);
+
+    const fetchAdmins = async () => {
+        try {
+            const response = await axios.get('/api/auth/admins');
+            setAdminsList(response.data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    useEffect(() => {
+        if (filter === 'Settings') {
+            fetchAdmins();
+        }
+    }, [filter]);
 
     const fetchComplaints = async () => {
         try {
@@ -100,7 +120,7 @@ const AdminDashboard = () => {
                     <CheckCircle size={20} /> Resolved
                 </div>
                 <div style={{ marginTop: 'auto', borderTop: '1px solid #eee', paddingTop: '20px' }}>
-                    <div className="sidebar-item">
+                    <div className={`sidebar-item ${filter === 'Settings' ? 'active' : ''}`} onClick={() => setFilter('Settings')}>
                         <Settings size={20} /> Settings
                     </div>
                 </div>
@@ -108,6 +128,93 @@ const AdminDashboard = () => {
 
             {/* Main Content */}
             <main className="dashboard-content">
+                {filter === 'Settings' ? (
+                    <div>
+                        <h2 style={{ marginBottom: '20px', color: '#333' }}>Settings</h2>
+                        
+                        <div className="card" style={{ padding: '20px', background: '#fff', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', marginBottom: '20px' }}>
+                            <h3 style={{ margin: '0 0 15px 0' }}>Existing Admins</h3>
+                            {adminsList.length === 0 ? <p style={{ color: '#666' }}>Loading admins...</p> : (
+                                <div style={{ overflowX: 'auto' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '500px' }}>
+                                        <thead>
+                                            <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #eee' }}>
+                                                <th style={{ padding: '12px 10px', color: '#555' }}>Name</th>
+                                                <th style={{ padding: '12px 10px', color: '#555' }}>Username</th>
+                                                <th style={{ padding: '12px 10px', color: '#555' }}>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {adminsList.map(admin => (
+                                                <tr key={admin.id} style={{ borderBottom: '1px solid #eee' }}>
+                                                    <td style={{ padding: '10px' }}>{admin.name}</td>
+                                                    <td style={{ padding: '10px' }}>{admin.username}</td>
+                                                    <td style={{ padding: '10px' }}>
+                                                        {isMainAdmin && admin.username !== 'Muralidhar' && (
+                                                            <button 
+                                                                onClick={async () => {
+                                                                    if (window.confirm(`Are you sure you want to remove admin "${admin.name}"?`)) {
+                                                                        try {
+                                                                            await axios.delete(`/api/auth/admin/${admin.id}`, { headers: { 'x-admin-username': user?.username }});
+                                                                            fetchAdmins();
+                                                                        } catch (err) {
+                                                                            alert(err.response?.data?.error || 'Error removing admin');
+                                                                        }
+                                                                    }
+                                                                }} 
+                                                                style={{ background: '#dc3545', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}
+                                                            >
+                                                                Remove
+                                                            </button>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+
+                        {isMainAdmin && (
+                            <div className="card" style={{ padding: '20px', background: '#fff', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                                <h3 style={{ margin: '0 0 10px 0' }}>Add New Admin</h3>
+                                <p style={{ color: '#666', marginBottom: '20px' }}>Create new admin users to help manage grievances.</p>
+                                <form onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    const username = e.target.username.value;
+                                    const password = e.target.password.value;
+                                    const name = e.target.name.value;
+                                    try {
+                                        const res = await axios.post('/api/auth/admin/register', {
+                                            username, password, name
+                                        }, { headers: { 'x-admin-username': user?.username }});
+                                        alert('Admin created successfully!');
+                                        e.target.reset();
+                                        fetchAdmins();
+                                    } catch (err) {
+                                        alert(err.response?.data?.error || 'Error creating admin');
+                                    }
+                                }}>
+                                    <div className="form-group" style={{ marginBottom: '15px' }}>
+                                        <label className="form-label" style={{ display: 'block', marginBottom: '5px', color: '#555' }}>Name</label>
+                                        <input type="text" name="name" className="form-control" required placeholder="Full Name" style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }} />
+                                    </div>
+                                    <div className="form-group" style={{ marginBottom: '15px' }}>
+                                        <label className="form-label" style={{ display: 'block', marginBottom: '5px', color: '#555' }}>Username</label>
+                                        <input type="text" name="username" className="form-control" required placeholder="username123" style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }} />
+                                    </div>
+                                    <div className="form-group" style={{ marginBottom: '20px' }}>
+                                        <label className="form-label" style={{ display: 'block', marginBottom: '5px', color: '#555' }}>Password</label>
+                                        <input type="password" name="password" className="form-control" required placeholder="Choose a secure password" style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }} />
+                                    </div>
+                                    <button type="submit" className="btn btn-primary" style={{ padding: '10px 20px' }}>Create Admin</button>
+                                </form>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                <>
                 {/* Stats Row */}
                 <div className="stats-grid">
                     <div className="stat-card">
@@ -196,6 +303,8 @@ const AdminDashboard = () => {
                             </div>
                         ))}
                     </div>
+                )}
+                </>
                 )}
             </main>
 

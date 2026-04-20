@@ -7,6 +7,7 @@ const ComplaintForm = () => {
     const { user, login } = useAuth();
 
     // Login State
+    const [nameInput, setNameInput] = useState('');
     const [mobileInput, setMobileInput] = useState('');
     const [loginError, setLoginError] = useState('');
 
@@ -62,8 +63,12 @@ const ComplaintForm = () => {
             setLoginError('Please enter a valid 10-digit mobile number');
             return;
         }
+        if (!nameInput.trim()) {
+            setLoginError('Please enter your full name');
+            return;
+        }
 
-        const result = await login({ mobile: mobileInput }, 'passenger');
+        const result = await login({ mobile: mobileInput, name: nameInput }, 'passenger');
         if (!result.success) {
             setLoginError(result.message);
         }
@@ -87,9 +92,7 @@ const ComplaintForm = () => {
         if (image) data.append('image', image);
 
         try {
-            const response = await axios.post('/api/complaints', data, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const response = await axios.post('/api/complaints', data);
             setRefId(response.data.id);
             // Refresh history
             fetchHistory(user.mobile);
@@ -114,6 +117,17 @@ const ComplaintForm = () => {
                     {loginError && <div style={{ color: 'red', marginBottom: '20px', background: '#fff3f3', padding: '10px', borderRadius: '4px' }}>{loginError}</div>}
 
                     <form onSubmit={handleLogin}>
+                        <div className="form-group" style={{ textAlign: 'left', marginBottom: '15px' }}>
+                            <label className="form-label">Full Name</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Enter your name"
+                                value={nameInput}
+                                onChange={(e) => setNameInput(e.target.value)}
+                                required
+                            />
+                        </div>
                         <div className="form-group" style={{ textAlign: 'left' }}>
                             <label className="form-label">Mobile Number</label>
                             <input

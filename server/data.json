@@ -1,0 +1,93 @@
+{
+  "users": [
+    {
+      "id": 2,
+      "username": "Muralidhar",
+      "password": "Murali@123",
+      "name": "MURALIDHAR",
+      "role": "admin",
+      "createdAt": "2026-04-08T17:35:48.000Z",
+      "updatedAt": "2026-04-08T17:35:48.000Z"
+    },
+    {
+      "id": 3,
+      "username": "Amarjeet",
+      "password": "Amarjeet123",
+      "name": "Amarjeet kumar",
+      "role": "admin",
+      "createdAt": "2026-04-08T17:39:36.000Z",
+      "updatedAt": "2026-04-08T17:39:36.000Z"
+    },
+    {
+      "id": 4,
+      "username": "Amar",
+      "password": "123456789",
+      "name": "amarjeet kumar",
+      "role": "admin",
+      "createdAt": "2026-04-08T17:47:58.000Z",
+      "updatedAt": "2026-04-08T17:47:58.000Z"
+    }
+  ],
+  "complaints": [
+    {
+      "id": "REF300850",
+      "name": "Durga",
+      "mobile": "5252842852",
+      "pnr": "4105404145",
+      "type": "Cleanliness",
+      "description": "ijc imveoijrgvnrhjemksom,coke",
+      "image": "/uploads/1775671001769.png",
+      "status": "Pending",
+      "resolution": null,
+      "assignedTo": null,
+      "assignedRole": null,
+      "createdAt": "2026-04-08T17:56:41.000Z",
+      "updatedAt": "2026-04-08T17:56:41.000Z"
+    },
+    {
+      "id": "REF469723",
+      "name": "Passenger 1562",
+      "mobile": "5416241562",
+      "pnr": "15404504150",
+      "type": "Medical Assistance",
+      "description": "mlc l vlk,fdk",
+      "image": "/uploads/1775670820308.png",
+      "status": "Pending",
+      "resolution": null,
+      "assignedTo": null,
+      "assignedRole": null,
+      "createdAt": "2026-04-08T17:53:40.000Z",
+      "updatedAt": "2026-04-08T17:53:40.000Z"
+    },
+    {
+      "id": "REF794527",
+      "name": "Passenger 7890",
+      "mobile": "1234567890",
+      "pnr": "2453278642",
+      "type": "Medical Assistance",
+      "description": "dnvjfgvnoer",
+      "image": "/uploads/1775669191060.png",
+      "status": "Pending",
+      "resolution": null,
+      "assignedTo": null,
+      "assignedRole": null,
+      "createdAt": "2026-04-08T17:26:31.000Z",
+      "updatedAt": "2026-04-08T17:26:31.000Z"
+    },
+    {
+      "id": "REF934253",
+      "name": "John Doe",
+      "mobile": "9876543210",
+      "pnr": "1234567890",
+      "type": "Service-related",
+      "description": "Test issue",
+      "image": null,
+      "status": "Resolved",
+      "resolution": "Good\n",
+      "assignedTo": "Durga",
+      "assignedRole": "Medical Team",
+      "createdAt": "2026-04-07T08:27:39.000Z",
+      "updatedAt": "2026-04-08T17:28:27.000Z"
+    }
+  ]
+}

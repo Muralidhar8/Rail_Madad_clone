@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import PassengerHome from './pages/PassengerHome';
 import TrackStatus from './pages/TrackStatus';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminRegister from './pages/AdminRegister';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
@@ -37,6 +38,14 @@ function App() {
                                 element={
                                     <ProtectedRoute roles={['admin']}>
                                         <AdminDashboard />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/admin/add-admin"
+                                element={
+                                    <ProtectedRoute roles={['admin']}>
+                                        <AdminRegister />
                                     </ProtectedRoute>
                                 }
                             />

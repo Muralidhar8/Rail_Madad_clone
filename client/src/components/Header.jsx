@@ -22,14 +22,23 @@ const Header = () => {
                 <nav>
                     <ul style={{ display: 'flex', gap: '20px', listStyle: 'none', margin: 0, padding: 0 }}>
                         <li><Link to="/" style={{ fontWeight: '500', color: '#333', textDecoration: 'none' }}>Home</Link></li>
-                        <li><Link to="/register" style={{ fontWeight: '500', color: '#333', textDecoration: 'none' }}>Passenger Login</Link></li>
-                        <li><Link to="/track" style={{ fontWeight: '500', color: '#333', textDecoration: 'none' }}>Track Status</Link></li>
+                        {user?.role !== 'admin' && (
+                            <>
+                                <li><Link to="/register" style={{ fontWeight: '500', color: '#333', textDecoration: 'none' }}>Passenger Login</Link></li>
+                                <li><Link to="/track" style={{ fontWeight: '500', color: '#333', textDecoration: 'none' }}>Track Status</Link></li>
+                            </>
+                        )}
                         {user ? (
                             <li style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <span style={{ fontWeight: 'bold', color: '#8B0000', display: 'flex', alignItems: 'center' }}>
                                     <User size={16} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
                                     {user.name}
                                 </span>
+                                {user.role === 'admin' && (
+                                    <Link to="/admin/add-admin" style={{ fontWeight: '500', color: '#333', textDecoration: 'none', fontSize: '0.9rem' }}>
+                                        Add Admin
+                                    </Link>
+                                )}
                                 <button
                                     onClick={() => {
                                         logout();

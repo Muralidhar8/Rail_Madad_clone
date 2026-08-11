@@ -1,6 +1,6 @@
 # Rail Madad Clone
 
-A MERN stack/Node.js-based web application.
+Node.js-based web application.
 
 ## Prerequisites
 Before you begin, ensure you have met the following requirements:

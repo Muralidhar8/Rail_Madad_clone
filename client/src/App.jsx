@@ -9,6 +9,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminRegister from './pages/AdminRegister';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import Chatbot from './components/Chatbot';
+
 
 const ProtectedRoute = ({ children, roles }) => {
     const { user } = useAuth();
@@ -52,6 +54,7 @@ function App() {
                         </Routes>
                     </main>
                     <Footer />
+                    <Chatbot />
                 </div>
             </Router>
         </AuthProvider>

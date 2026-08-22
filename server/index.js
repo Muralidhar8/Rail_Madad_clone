@@ -276,6 +276,109 @@ app.post('/api/auth/passenger', (req, res) => {
     }
 });
 
+// 9. Chatbot FAQ / Assistance Route
+app.post('/api/chat', async (req, res) => {
+    const { message } = req.body;
+    if (!message) {
+        return res.status(400).json({ error: 'Message is required' });
+    }
+
+    const query = message.toLowerCase().trim();
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    let reply = "";
+    let options = [];
+
+    // If Gemini API Key is configured and not default placeholder, attempt AI generation
+    if (apiKey && apiKey !== 'YOUR_GEMINI_API_KEY_HERE') {
+        try {
+            const systemInstruction = 
+                "You are RailMitra, a helpful, polite, and official digital assistant for Rail Madad (Indian Railways grievance redressal portal). " +
+                "Answer passenger queries politely, clearly, and concisely (maximum 2-3 sentences). " +
+                "Focus on railway inquiries (e.g., ticket cancellations, TDR, refunds, cleanliness, food e-catering, medical emergency, coach security, helpline 139). " +
+                "If the query is completely unrelated to Indian Railways, politely guide them back to railway inquiries.";
+
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: message }] }],
+                    systemInstruction: {
+                        parts: [{ text: systemInstruction }]
+                    },
+                    generationConfig: {
+                        maxOutputTokens: 150,
+                        temperature: 0.5
+                    }
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                reply = reply.trim();
+                
+                // Dynamically assign options based on keyword check of user query
+                if (query.includes('medical') || query.includes('emergency') || query.includes('doctor') || query.includes('hurt') || query.includes('sick')) {
+                    options = ["Lodge a Complaint 📝", "Call Help 139 📞", "Back to Menu 🏠"];
+                } else if (query.includes('refund') || query.includes('cancel') || query.includes('tdr') || query.includes('money')) {
+                    options = ["Track Status 🔍", "Back to Menu 🏠"];
+                } else if (query.includes('clean') || query.includes('dirt') || query.includes('toilet') || query.includes('washroom') || query.includes('trash')) {
+                    options = ["Lodge a Complaint 📝", "Back to Menu 🏠"];
+                } else if (query.includes('food') || query.includes('catering') || query.includes('meal') || query.includes('water')) {
+                    options = ["Lodge a Complaint 📝", "Back to Menu 🏠"];
+                } else if (query.includes('security') || query.includes('theft') || query.includes('police') || query.includes('rpf') || query.includes('harass')) {
+                    options = ["Lodge a Complaint 📝", "Call Help 139 📞", "Back to Menu 🏠"];
+                } else {
+                    options = ["Lodge a Complaint 📝", "Track Complaint 🔍", "Back to Menu 🏠"];
+                }
+            } else {
+                console.error("Gemini API Error Response:", await response.text());
+                throw new Error("Gemini API returned error status");
+            }
+        } catch (error) {
+            console.error("Failed to fetch response from Gemini API, falling back to keywords:", error.message);
+        }
+    }
+
+    // Fallback: Smart Keyword Matching FAQ (runs if API key is missing or call fails)
+    if (!reply) {
+        let note = "";
+        if (!apiKey || apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
+            note = "\n\n*(Note: AI mode is offline. Add GEMINI_API_KEY to server/.env to enable full AI answers)*";
+        }
+
+        if (query.includes('medical') || query.includes('emergency') || query.includes('doctor') || query.includes('hospital') || query.includes('hurt') || query.includes('sick')) {
+            reply = "For medical emergencies on-board or at stations, please call 139 immediately to alert the train crew. You can also lodge a complaint under the 'Medical Emergency' category so that the next station's medical team can be notified to assist you on arrival." + note;
+            options = ["Lodge a Complaint 📝", "Call Help 139 📞", "Back to Menu 🏠"];
+        } else if (query.includes('refund') || query.includes('cancel') || query.includes('tdr') || query.includes('money back') || query.includes('fare')) {
+            reply = "To claim a refund for cancelled tickets or train delays of more than 3 hours, you must file a TDR (Ticket Deposit Receipt) through your IRCTC account within the prescribed time limits. For tickets purchased at counters, refunds can be obtained at railway reservation counters." + note;
+            options = ["Track Status 🔍", "Back to Menu 🏠"];
+        } else if (query.includes('food') || query.includes('catering') || query.includes('meal') || query.includes('water') || query.includes('pantry') || query.includes('lunch') || query.includes('dinner') || query.includes('breakfast')) {
+            reply = "You can order meals directly to your train seat using IRCTC's e-Catering services by downloading the 'IRCTC eCatering' app, visiting ecatering.irctc.co.in, or by calling 1323. If you have hygiene or quality issues with the food served on board, you can file a grievance under 'Catering'." + note;
+            options = ["Lodge a Complaint 📝", "Back to Menu 🏠"];
+        } else if (query.includes('clean') || query.includes('dirt') || query.includes('trash') || query.includes('garbage') || query.includes('toilet') || query.includes('washroom') || query.includes('smell') || query.includes('bed') || query.includes('linen')) {
+            reply = "For cleanliness issues inside coaches or toilets, or request for clean linen, please log a complaint under the 'Cleanliness' category. The on-board house keeping staff (OBHS) will be alerted to address your seat/coach at the next available station." + note;
+            options = ["Lodge a Complaint 📝", "Back to Menu 🏠"];
+        } else if (query.includes('security') || query.includes('theft') || query.includes('rob') || query.includes('fight') || query.includes('harass') || query.includes('police') || query.includes('rpf') || query.includes('grp') || query.includes('harassment') || query.includes('abuse')) {
+            reply = "For any security concerns or harassment, contact the Railway Protection Force (RPF) by dialing 139 immediately. You can also file a complaint under the 'Security' category so that security personnel at the next station can check your coach." + note;
+            options = ["Lodge a Complaint 📝", "Call Help 139 📞", "Back to Menu 🏠"];
+        } else if (query.includes('hello') || query.includes('hi') || query.includes('hey') || query.includes('assist') || query.includes('help') || query.includes('who are you') || query.includes('menu')) {
+            reply = "Namaste! I am RailMitra, your Rail Madad Chat Assistant. 🚄 I can help you lodge a complaint, track your existing complaint status, or answer common queries. How can I help you today?";
+            options = ["Lodge a Complaint 📝", "Track Complaint 🔍", "General FAQs ℹ️"];
+        } else if (query.includes('faq') || query.includes('question') || query.includes('info') || query.includes('how to')) {
+            reply = "Here are some topics you can ask me about:\n• Medical Emergencies\n• Ticket Refunds & TDR\n• E-Catering / Food ordering\n• Cleanliness & Hygiene\n• Coach Security\n\nOr click below to lodge/track a grievance.";
+            options = ["Lodge a Complaint 📝", "Track Complaint 🔍", "Back to Menu 🏠"];
+        } else {
+            reply = "I'm sorry, I didn't quite catch that. I am here to help you navigate Rail Madad. You can ask me about refunds, medical emergencies, food services, cleanliness, or use the menu options below." + note;
+            options = ["Lodge a Complaint 📝", "Track Complaint 🔍", "General FAQs ℹ️"];
+        }
+    }
+
+    res.json({ reply, options });
+});
+
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });

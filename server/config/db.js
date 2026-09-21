@@ -5,7 +5,10 @@ dotenv.config();
 let sequelize;
 
 if (process.env.DATABASE_URL) {
-  sequelize = new Sequelize(process.env.DATABASE_URL, {
+  // Strip URL query parameters (like ?ssl=...) because mysql2 expects SSL options in dialectOptions
+  const cleanUrl = process.env.DATABASE_URL.split('?')[0];
+
+  sequelize = new Sequelize(cleanUrl, {
     dialect: 'mysql',
     logging: false,
     dialectOptions: process.env.DB_SSL === 'false' ? {} : {

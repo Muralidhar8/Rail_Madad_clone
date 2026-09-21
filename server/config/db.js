@@ -6,7 +6,18 @@ let sequelize;
 
 if (process.env.DATABASE_URL) {
   // Strip URL query parameters (like ?ssl=...) because mysql2 expects SSL options in dialectOptions
-  const cleanUrl = process.env.DATABASE_URL.split('?')[0];
+  let cleanUrl = process.env.DATABASE_URL.split('?')[0];
+
+  try {
+    const parsed = new URL(cleanUrl);
+    // If no database name is specified, use default 'test' database where user has full CREATE permissions
+    if (!parsed.pathname || parsed.pathname === '/') {
+      parsed.pathname = '/test';
+      cleanUrl = parsed.toString();
+    }
+  } catch (e) {
+    console.error('URL parse note:', e.message);
+  }
 
   sequelize = new Sequelize(cleanUrl, {
     dialect: 'mysql',

@@ -10,9 +10,9 @@ if (process.env.DATABASE_URL) {
 
   try {
     const parsed = new URL(cleanUrl);
-    // If no database name is specified, use default 'test' database where user has full CREATE permissions
-    if (!parsed.pathname || parsed.pathname === '/') {
-      parsed.pathname = '/test';
+    // If pointing to root, empty, or system schemas (like sys or mysql), redirect to 'test'
+    if (!parsed.pathname || parsed.pathname === '/' || parsed.pathname.toLowerCase() === '/sys' || parsed.pathname.toLowerCase() === '/mysql') {
+      parsed.pathname = `/${process.env.DB_NAME || 'test'}`;
       cleanUrl = parsed.toString();
     }
   } catch (e) {

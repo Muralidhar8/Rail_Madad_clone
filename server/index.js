@@ -82,8 +82,8 @@ app.post('/api/complaints', upload.single('image'), async (req, res) => {
             id: createdComplaint.id
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Server error registering complaint' });
+        console.error('Error creating complaint:', error);
+        res.status(500).json({ error: 'Database/Server error: ' + error.message });
     }
 });
 

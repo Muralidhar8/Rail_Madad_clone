@@ -97,7 +97,9 @@ const ComplaintForm = () => {
             // Refresh history
             fetchHistory(user.mobile);
         } catch (err) {
-            setFormError('Failed to register complaint. Please try again.');
+            console.error('Complaint submit error:', err);
+            const serverMsg = err.response?.data?.message || err.response?.data?.error;
+            setFormError(serverMsg || (err.message ? `Connection error: ${err.message}` : 'Failed to register complaint. Please try again.'));
         } finally {
             setIsSubmitting(false);
         }

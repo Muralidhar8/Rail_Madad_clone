@@ -44,6 +44,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Health & Root Status
+app.get('/', (req, res) => {
+    res.json({ message: 'Rail Madad API is running smoothly', status: 'OK' });
+});
+
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'UP', timestamp: new Date() });
+});
+
 // API Endpoints
 
 // 1. Register Complaint
@@ -298,7 +307,7 @@ app.post('/api/chat', async (req, res) => {
                 "Focus on railway inquiries (e.g., ticket cancellations, TDR, refunds, cleanliness, food e-catering, medical emergency, coach security, helpline 139). " +
                 "If the query is completely unrelated to Indian Railways, politely guide them back to railway inquiries.";
 
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

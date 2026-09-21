@@ -271,7 +271,7 @@ const AdminDashboard = () => {
                                 <p style={{ color: '#444', marginBottom: '15px', lineHeight: '1.5' }}>{complaint.description}</p>
 
                                 {complaint.image && (
-                                    <a href={`http://localhost:5000${complaint.image}`} target="_blank" rel="noreferrer" style={{ display: 'inline-block', marginBottom: '15px', color: 'blue', fontSize: '0.9rem' }}>
+                                    <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${complaint.image}`} target="_blank" rel="noreferrer" style={{ display: 'inline-block', marginBottom: '15px', color: 'blue', fontSize: '0.9rem' }}>
                                         View Attachment
                                     </a>
                                 )}
